@@ -1,98 +1,88 @@
-<!-- SYNC IMPACT REPORT:
-Version change: 1.0.0 → 1.1.0
-Modified principles: [PRINCIPLE_1_NAME] → Security-first design, [PRINCIPLE_2_NAME] → Spec-driven development, [PRINCIPLE_3_NAME] → Separation of concerns, [PRINCIPLE_4_NAME] → Scalability & maintainability, [PRINCIPLE_5_NAME] → User-centric experience
-Added sections: Key Standards, Constraints, API Constraints, Agent Responsibilities, Success Criteria
-Removed sections: Template placeholders
-Templates requiring updates: ✅ Updated all
-Follow-up TODOs: None
--->
-# Hackathon-2 Phase-2 Constitution
+# Project Constitution: Phase III – AI-Powered Todo Chatbot with MCP
 
-## Core Principles
+## Governance Information
+- **RATIFICATION_DATE**: 2026-02-11
+- **LAST_AMENDED_DATE**: 2026-02-11
+- **CONSTITUTION_VERSION**: 1.0.0
+- **AMENDMENT_PROCEDURE**: Requires majority consensus of active contributors with 48-hour review period
 
-### Security-first design
-Authentication, authorization, and data isolation are mandatory at every layer. All API endpoints must be secured with JWT-based authentication, and each user may access only their own data. No hardcoded credentials or secrets in source code are permitted.
+## Mission Statement
+Build a production-grade, AI-powered conversational Todo system that allows users to manage tasks using natural language. The system must be stateless at the server level, persist all state in a PostgreSQL database, and use MCP (Model Context Protocol) tools invoked by AI agents to perform task operations.
 
-### Spec-driven development
-All implementation must follow clearly defined specifications using Claude Code + Spec-Kit Plus. Every feature must be planned, specified, and validated against requirements before implementation begins.
+## Core Principles (Non-Negotiable)
 
-### Separation of concerns
-Frontend, backend, authentication, and database responsibilities must remain clearly separated. Backend and frontend must be loosely coupled, with clean API contracts defining their interactions.
+### 1. Stateless Server Architecture
+- No in-memory state is allowed in FastAPI, Agents, or MCP tools
+- All conversation context must be fetched from and stored in the database per request
 
-### Scalability & maintainability
-Architecture should support future feature expansion with minimal refactoring. Code must follow framework best practices and conventions, with clear error handling and proper HTTP status codes.
+### 2. Clear Separation of Responsibilities
+- FastAPI: HTTP API layer only
+- OpenAI Agents SDK: reasoning, intent detection, tool orchestration
+- MCP Server: exposes task operations as tools only
+- Database: single source of truth for tasks, conversations, and messages
 
-### User-centric experience
-The application must be intuitive, responsive, and accessible across devices. Frontend must use Next.js 16+ App Router with responsive layout and components that provide a seamless user experience.
+### 3. Tool-Driven Task Management
+- AI agents must NEVER manipulate the database directly
+- All task operations MUST go through MCP tools
+- MCP tools themselves must be stateless and database-backed
 
-### Data integrity
-Persistent storage must maintain consistency and reliability. Database access must use SQLModel ORM with proper transaction handling and validation to prevent data corruption.
+### 4. Deterministic, Auditable Behavior
+- Every user message and assistant response must be persisted
+- Every MCP tool invocation must be traceable
+- Agent decisions must be explainable via tool_calls
 
-## Key Standards
+### 5. Hackathon-Safe Simplicity
+- No premature optimization
+- No over-engineering
+- Prefer clarity and correctness over abstraction depth
 
-- All API endpoints must be **RESTful and documented**
-- JWT-based authentication must be enforced on **every protected endpoint**
-- Each user may access **only their own data**
-- Frontend must use **Next.js 16+ App Router**
-- Backend must use **Python FastAPI**
-- Database access must use **SQLModel ORM**
-- Persistent storage must be **Neon Serverless PostgreSQL**
-- Authentication must use **Better Auth** with JWT tokens
-- Code must follow framework best practices and conventions
-- Clear error handling and proper HTTP status codes are required
+## Technology Constraints (Must Use)
+- Backend Framework: FastAPI (Python)
+- ORM: SQLModel (async)
+- Database: Neon Serverless PostgreSQL
+- AI Framework: OpenAI Agents SDK
+- MCP Server: Official MCP SDK
+- Frontend: OpenAI ChatKit
+- Authentication: Better Auth
 
-## Constraints
+## Data Integrity Rules
+- All database writes must be transactional
+- user_id is required for all task, conversation, and message records
+- Conversations must survive server restarts
+- Duplicate task creation must be avoided where reasonably possible
 
-- Application must implement **all 5 Basic Level features**
-- Architecture must support **multi-user usage**
-- Backend and frontend must be **loosely coupled**
-- Authentication logic must not leak secrets to the frontend
-- No hardcoded credentials or secrets in source code
-- All protected API routes must require valid JWT tokens
+## AI Behavior Rules
+- The assistant must always confirm user actions in natural language
+- The assistant must never expose internal implementation details
+- Errors must be handled gracefully and explained clearly to the user
+- Ambiguous user requests must be resolved via reasonable assumptions, not follow-up questions
 
-## API Constraints
+## Scope Control
 
-- Base path: `/api/{user_id}`
-- Supported methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`
-- Endpoints must enforce:
-  - Authentication (JWT verification)
-  - Authorization (user ownership validation)
+### IN SCOPE:
+- Conversational task management
+- MCP tool-based task operations
+- Stateless chat endpoint
+- Conversation persistence
 
-## Agent Responsibilities
+### OUT OF SCOPE:
+- Frontend UI styling
+- Real-time streaming responses
+- Background jobs or schedulers
+- Multi-agent coordination
 
-- **Auth Agent**
-  - Better Auth integration
-  - JWT issuing and validation strategy
-  - Security standards enforcement
-
-- **Backend Agent**
-  - FastAPI REST API implementation
-  - JWT verification and authorization logic
-  - Business rules and data validation
-
-- **DB Agent**
-  - SQLModel schema design
-  - Neon PostgreSQL integration
-  - Data integrity and relationships
-
-- **Frontend Agent**
-  - Next.js App Router UI development
-  - Responsive layout and components
-  - Auth-aware routing and API consumption
+## Quality Bar
+- Code must be readable and modular
+- Architecture must be easy to explain to judges
+- Authentication can be temporarily relaxed for hackathon testing, but must be reversible
+- System must function correctly after server restart without data loss
 
 ## Success Criteria
+- Users can manage todos using natural language
+- AI agent correctly maps intent to MCP tools
+- Conversations resume correctly after restart
+- No task operation bypasses MCP tools
+- System behaves predictably and reliably under repeated requests
 
-- Users can sign up and sign in securely
-- JWT-secured API communication works end-to-end
-- Each user can only view and modify their own tasks
-- All task CRUD operations function correctly
-- Data persists across sessions and reloads
-- Frontend is responsive and accessible
-- No unauthorized API access is possible
-- System passes functional and security review
-
-## Governance
-
-This constitution governs all development activities for the Hackathon-2 Phase-2 project. All implementation must comply with the stated principles and standards. Amendments to this constitution require team consensus and must be documented with clear justification. All pull requests and reviews must verify compliance with these principles.
-
-**Version**: 1.1.0 | **Ratified**: 2026-02-06 | **Last Amended**: 2026-02-06
+## Amendment Log
+- v1.0.0 (2026-02-11): Initial constitution for Phase III – AI-Powered Todo Chatbot

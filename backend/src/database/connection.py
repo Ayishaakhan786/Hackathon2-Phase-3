@@ -1,10 +1,12 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlmodel import create_engine, Session
 from sqlalchemy.pool import QueuePool
 from ..config.settings import DATABASE_URL
+from ..models.conversation import Conversation
+from ..models.message import Message
+from ..models.task import Task  # Import Task model
 import logging
 
-# Create the SQLAlchemy engine with connection pooling and SSL configuration
+# Create the SQLModel engine with connection pooling and SSL configuration
 engine = create_engine(
     DATABASE_URL,
     poolclass=QueuePool,
@@ -16,18 +18,12 @@ engine = create_engine(
     echo=False  # Enable SQL query logging based on DEBUG setting
 )
 
-# Create a SessionLocal class for database sessions
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def get_db():
+def get_session() -> Session:
     """
     Dependency function to get database session
     """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    with Session(engine) as session:
+        yield session
 
 # Log successful database connection
 logging.info("Database engine created successfully with SSL configuration")
@@ -43,3 +39,11 @@ def get_connection_stats():
         "overflow": pool.overflow(),
         "connections_active": getattr(engine, "pool")._checkedout(),
     }
+
+def create_db_and_tables():
+    """
+    Create database tables if they don't exist
+    """
+    from sqlmodel import SQLModel
+    SQLModel.metadata.create_all(engine)
+    logging.info("Database tables created successfully")

@@ -1,0 +1,247 @@
+# MCP Tool Contracts: Task Management
+
+## add_task(user_id, title, description?)
+
+Adds a new task to a user's task list.
+
+### Parameters
+- `user_id` (string, required): The unique identifier of the user
+- `title` (string, required): The title of the task to be added
+- `description` (string, optional): An optional description of the task
+
+### Response
+```json
+{
+  "success": boolean,
+  "task_id": string,
+  "message": string
+}
+```
+
+#### Fields
+- `success` (boolean): Indicates if the operation was successful
+- `task_id` (string): The ID of the newly created task (if successful)
+- `message` (string): A descriptive message about the operation result
+
+### Example Request
+```json
+{
+  "user_id": "user123",
+  "title": "Buy groceries",
+  "description": "Milk, bread, eggs, and fruits"
+}
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "task_id": "task456",
+  "message": "Task added successfully"
+}
+```
+
+### Error Responses
+- `{ "success": false, "message": "Invalid user ID" }`
+- `{ "success": false, "message": "Title is required" }`
+- `{ "success": false, "message": "Database error occurred" }`
+
+---
+
+## list_tasks(user_id, status?)
+
+Retrieves a list of tasks for a user, optionally filtered by status.
+
+### Parameters
+- `user_id` (string, required): The unique identifier of the user
+- `status` (string, optional): Filter tasks by status ('all', 'pending', 'completed'). Default: 'all'
+
+### Response
+```json
+{
+  "success": boolean,
+  "tasks": [
+    {
+      "id": string,
+      "title": string,
+      "description": string,
+      "completed": boolean,
+      "created_at": string,
+      "updated_at": string
+    }
+  ],
+  "message": string
+}
+```
+
+#### Fields
+- `success` (boolean): Indicates if the operation was successful
+- `tasks` (array): Array of task objects matching the criteria
+- `message` (string): A descriptive message about the operation result
+
+### Example Request
+```json
+{
+  "user_id": "user123",
+  "status": "pending"
+}
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "tasks": [
+    {
+      "id": "task456",
+      "title": "Buy groceries",
+      "description": "Milk, bread, eggs, and fruits",
+      "completed": false,
+      "created_at": "2023-10-01T10:00:00Z",
+      "updated_at": "2023-10-01T10:00:00Z"
+    }
+  ],
+  "message": "Tasks retrieved successfully"
+}
+```
+
+### Error Responses
+- `{ "success": false, "message": "Invalid user ID" }`
+- `{ "success": false, "message": "Invalid status parameter" }`
+- `{ "success": false, "message": "Database error occurred" }`
+
+---
+
+## complete_task(user_id, task_id)
+
+Marks a task as completed.
+
+### Parameters
+- `user_id` (string, required): The unique identifier of the user
+- `task_id` (string, required): The ID of the task to be marked as completed
+
+### Response
+```json
+{
+  "success": boolean,
+  "message": string
+}
+```
+
+#### Fields
+- `success` (boolean): Indicates if the operation was successful
+- `message` (string): A descriptive message about the operation result
+
+### Example Request
+```json
+{
+  "user_id": "user123",
+  "task_id": "task456"
+}
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "message": "Task marked as completed successfully"
+}
+```
+
+### Error Responses
+- `{ "success": false, "message": "Invalid user ID" }`
+- `{ "success": false, "message": "Task not found" }`
+- `{ "success": false, "message": "Task does not belong to user" }`
+- `{ "success": false, "message": "Database error occurred" }`
+
+---
+
+## update_task(user_id, task_id, title?, description?)
+
+Updates the details of an existing task.
+
+### Parameters
+- `user_id` (string, required): The unique identifier of the user
+- `task_id` (string, required): The ID of the task to be updated
+- `title` (string, optional): New title for the task
+- `description` (string, optional): New description for the task
+
+### Response
+```json
+{
+  "success": boolean,
+  "message": string
+}
+```
+
+#### Fields
+- `success` (boolean): Indicates if the operation was successful
+- `message` (string): A descriptive message about the operation result
+
+### Example Request
+```json
+{
+  "user_id": "user123",
+  "task_id": "task456",
+  "title": "Buy weekly groceries",
+  "description": "Milk, bread, eggs, fruits, and vegetables"
+}
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "message": "Task updated successfully"
+}
+```
+
+### Error Responses
+- `{ "success": false, "message": "Invalid user ID" }`
+- `{ "success": false, "message": "Task not found" }`
+- `{ "success": false, "message": "Task does not belong to user" }`
+- `{ "success": false, "message": "Database error occurred" }`
+
+---
+
+## delete_task(user_id, task_id)
+
+Deletes a task from a user's task list.
+
+### Parameters
+- `user_id` (string, required): The unique identifier of the user
+- `task_id` (string, required): The ID of the task to be deleted
+
+### Response
+```json
+{
+  "success": boolean,
+  "message": string
+}
+```
+
+#### Fields
+- `success` (boolean): Indicates if the operation was successful
+- `message` (string): A descriptive message about the operation result
+
+### Example Request
+```json
+{
+  "user_id": "user123",
+  "task_id": "task456"
+}
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "message": "Task deleted successfully"
+}
+```
+
+### Error Responses
+- `{ "success": false, "message": "Invalid user ID" }`
+- `{ "success": false, "message": "Task not found" }`
+- `{ "success": false, "message": "Task does not belong to user" }`
+- `{ "success": false, "message": "Database error occurred" }`

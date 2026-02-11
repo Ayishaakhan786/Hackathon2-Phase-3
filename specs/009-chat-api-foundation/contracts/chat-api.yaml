@@ -1,0 +1,61 @@
+# OpenAPI Contract: Chat API
+
+## POST /api/{user_id}/chat
+
+Initiates or continues a chat conversation for a specific user.
+
+### Path Parameters
+- `user_id` (string, required): The unique identifier of the user
+
+### Request Body
+```json
+{
+  "conversation_id": "string",
+  "message": "string"
+}
+```
+
+#### Fields
+- `conversation_id` (optional): The ID of an existing conversation to continue. If not provided, a new conversation will be created.
+- `message` (required): The user's message content.
+
+### Response
+```json
+{
+  "conversation_id": "string",
+  "response": "string",
+  "tool_calls": []
+}
+```
+
+#### Fields
+- `conversation_id` (string): The ID of the conversation (either the provided one or newly created)
+- `response` (string): The assistant's response to the user's message
+- `tool_calls` (array): Empty array for now, reserved for future AI agent integration
+
+### Example Request
+```http
+POST /api/user123/chat
+Content-Type: application/json
+
+{
+  "message": "Hello, how can you help me?"
+}
+```
+
+### Example Response
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "conversation_id": "conv456",
+  "response": "Hello! I'm here to help. What would you like to do?",
+  "tool_calls": []
+}
+```
+
+### Error Responses
+- `400 Bad Request`: Invalid request format
+- `401 Unauthorized`: Invalid or missing user authentication
+- `500 Internal Server Error`: Server-side error during processing

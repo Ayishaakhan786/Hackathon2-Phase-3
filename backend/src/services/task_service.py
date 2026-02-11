@@ -1,83 +1,147 @@
-from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
-from ..models.task import Task, TaskCreate
-from uuid import UUID
+from datetime import datetime
+from typing import List, Optional
+from sqlmodel import select, Session
+from enum import Enum
+
+from ..models.task import Task, TaskCreate, TaskUpdate
 
 
-class TaskService:
-    @staticmethod
-    async def create_task(*, task_create: TaskCreate, user_id: UUID, db_session: AsyncSession) -> Task:
-        """
-        Create a new task for a specific user.
-        """
-        # Create the task object with the user_id
-        task = Task.model_validate(task_create, update={"user_id": user_id})
+class TaskStatus(str(Enum):
+    ALL = "all"
+    PENDING = "pending"
+    COMPLETED = "completed"
+
+
+def add_task(*, session: Session, user_id: str, title: str, description: Optional[str] = None) -> Task:
+    """
+    Add a new task for the given user.
+    
+    Args:
+        session: Database session
+        user_id: ID of the user creating the task
+        title: Title of the task
+        description: Optional description of the task
         
-        # Add to database
-        db_session.add(task)
-        await db_session.commit()
-        await db_session.refresh(task)
+    Returns:
+        The created Task object
+    """
+    task = Task(user_id=user_id, title=title, description=description)
+    session.add(task)
+    session.commit()
+    session.refresh(task)
+    return task
+
+
+def list_tasks(*, session: Session, user_id: str, status: TaskStatus = TaskStatus.ALL) -> List[Task]:
+    """
+    List tasks for a specific user, optionally filtered by status.
+    
+    Args:
+        session: Database session
+        user_id: ID of the user whose tasks to retrieve
+        status: Filter by task status (all, pending, completed)
         
+    Returns:
+        List of Task objects matching the criteria
+    """
+    statement = select(Task).where(Task.user_id == user_id)
+    
+    if status == TaskStatus.PENDING:
+        statement = statement.where(Task.completed == False)
+    elif status == TaskStatus.COMPLETED:
+        statement = statement.where(Task.completed == True)
+    
+    statement = statement.order_by(Task.created_at.desc())
+    tasks = session.exec(statement).all()
+    return tasks
+
+
+def complete_task(*, session: Session, user_id: str, task_id: str) -> Optional[Task]:
+    """
+    Mark a task as completed.
+    
+    Args:
+        session: Database session
+        user_id: ID of the user who owns the task
+        task_id: ID of the task to mark as completed
+        
+    Returns:
+        The updated Task object if found and owned by the user, None otherwise
+    """
+    statement = select(Task).where(
+        Task.id == task_id,
+        Task.user_id == user_id
+    )
+    task = session.exec(statement).first()
+    
+    if task:
+        task.completed = True
+        session.add(task)
+        session.commit()
+        session.refresh(task)
         return task
+    
+    return None
 
-    @staticmethod
-    async def get_task_by_id(*, task_id: UUID, db_session: AsyncSession) -> Task:
-        """
-        Retrieve a task by its ID.
-        """
-        statement = select(Task).where(Task.id == task_id)
-        result = await db_session.exec(statement)
-        return result.first()
 
-    @staticmethod
-    async def get_tasks_by_user_id(*, user_id: UUID, db_session: AsyncSession) -> list[Task]:
-        """
-        Retrieve all tasks for a specific user.
-        """
-        statement = select(Task).where(Task.user_id == user_id)
-        result = await db_session.exec(statement)
-        return result.all()
-
-    @staticmethod
-    async def update_task(*, task_id: UUID, task_update: dict, db_session: AsyncSession) -> Task:
-        """
-        Update a task with the provided data.
-        """
-        task = await TaskService.get_task_by_id(task_id=task_id, db_session=db_session)
-        if not task:
-            return None
+def update_task(*, session: Session, user_id: str, task_id: str, task_update: TaskUpdate) -> Optional[Task]:
+    """
+    Update a task's details.
+    
+    Args:
+        session: Database session
+        user_id: ID of the user who owns the task
+        task_id: ID of the task to update
+        task_update: TaskUpdate object with fields to update
         
-        # Update the task with the provided data
-        for key, value in task_update.items():
-            setattr(task, key, value)
-        
-        await db_session.commit()
-        await db_session.refresh(task)
+    Returns:
+        The updated Task object if found and owned by the user, None otherwise
+    """
+    statement = select(Task).where(
+        Task.id == task_id,
+        Task.user_id == user_id
+    )
+    task = session.exec(statement).first()
+    
+    if task:
+        # Apply updates
+        if task_update.title is not None:
+            task.title = task_update.title
+        if task_update.description is not None:
+            task.description = task_update.description
+        if task_update.completed is not None:
+            task.completed = task_update.completed
+            
+        task.updated_at = datetime.utcnow()
+        session.add(task)
+        session.commit()
+        session.refresh(task)
         return task
+    
+    return None
 
-    @staticmethod
-    async def delete_task(*, task_id: UUID, db_session: AsyncSession) -> bool:
-        """
-        Delete a task by its ID.
-        """
-        task = await TaskService.get_task_by_id(task_id=task_id, db_session=db_session)
-        if not task:
-            return False
+
+def delete_task(*, session: Session, user_id: str, task_id: str) -> bool:
+    """
+    Delete a task.
+    
+    Args:
+        session: Database session
+        user_id: ID of the user who owns the task
+        task_id: ID of the task to delete
         
-        await db_session.delete(task)
-        await db_session.commit()
+    Returns:
+        True if the task was found and deleted, False otherwise
+    """
+    statement = select(Task).where(
+        Task.id == task_id,
+        Task.user_id == user_id
+    )
+    task = session.exec(statement).first()
+    
+    if task:
+        session.delete(task)
+        session.commit()
         return True
-
-    @staticmethod
-    async def toggle_task_completion(*, task_id: UUID, db_session: AsyncSession) -> Task:
-        """
-        Toggle the completion status of a task.
-        """
-        task = await TaskService.get_task_by_id(task_id=task_id, db_session=db_session)
-        if not task:
-            return None
-        
-        task.completed = not task.completed
-        await db_session.commit()
-        await db_session.refresh(task)
-        return task
+    
+    return False

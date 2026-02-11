@@ -2,8 +2,10 @@
 name = "backend"
 version = "0.1.0"
 description = "Backend for the multi-user task management application"
-authors = ["Developer <developer@example.com>"]
-requires-python = ">=3.11"
+authors = [
+    {name = "Developer", email = "developer@example.com"}
+]
+requires-python = ">=3.11,<4.0"
 
 dependencies = [
     "fastapi==0.104.1",
@@ -14,9 +16,9 @@ dependencies = [
     "passlib[bcrypt]==1.7.4",
     "python-jose[cryptography]==3.3.0",
     "python-multipart==0.0.6",
-    "neon==0.1.0",
     "alembic==1.13.1",
-    "asyncpg==0.29.0"
+    "asyncpg==0.29.0",
+    "openai>=1.0.0"
 ]
 
 [project.optional-dependencies]
