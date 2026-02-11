@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+
+# Environment variables
+.env*
+
+# Next.js
+.next
+out
+
+# Git
+.git
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build outputs
+dist
+build

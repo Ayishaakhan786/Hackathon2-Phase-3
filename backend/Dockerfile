@@ -28,5 +28,5 @@ COPY alembic.ini .
 # Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["sh", "-c", "poetry run alembic upgrade head && python -m src.main"]
+# Run the application with uvicorn for production
+CMD ["sh", "-c", "poetry run alembic upgrade head && poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000"]

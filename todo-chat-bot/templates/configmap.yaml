@@ -1,0 +1,14 @@
+{{- if or .Values.backend.enabled .Values.frontend.enabled .Values.postgres.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "todo-chat-bot.fullname" . }}-config
+  labels:
+    {{- include "todo-chat-bot.labels" . | nindent 4 }}
+data:
+  # Common configuration values
+  DATABASE_HOST: "{{ include "todo-chat-bot.fullname" . }}-postgres-service"
+  DATABASE_PORT: "{{ .Values.postgres.service.port }}"
+  BACKEND_PORT: "{{ .Values.backend.service.port }}"
+  FRONTEND_PORT: "{{ .Values.frontend.service.port }}"
+{{- end }}

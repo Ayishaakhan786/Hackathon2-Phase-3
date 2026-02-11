@@ -1,0 +1,61 @@
+{{- if .Values.backend.enabled | default true }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-chat-bot.fullname" . }}-backend-service
+  labels:
+    {{- include "todo-chat-bot.labels" . | nindent 4 }}
+    app: backend
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+    - port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "todo-chat-bot.selectorLabels" . | nindent 4 }}
+    app: backend
+---
+{{- end }}
+
+{{- if .Values.frontend.enabled | default true }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-chat-bot.fullname" . }}-frontend-service
+  labels:
+    {{- include "todo-chat-bot.labels" . | nindent 4 }}
+    app: frontend
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "todo-chat-bot.selectorLabels" . | nindent 4 }}
+    app: frontend
+---
+{{- end }}
+
+{{- if .Values.postgres.enabled | default true }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-chat-bot.fullname" . }}-postgres-service
+  labels:
+    {{- include "todo-chat-bot.labels" . | nindent 4 }}
+    app: postgres
+spec:
+  type: {{ .Values.postgres.service.type }}
+  ports:
+    - port: {{ .Values.postgres.service.port }}
+      targetPort: {{ .Values.postgres.service.targetPort }}
+      protocol: TCP
+      name: postgres
+  selector:
+    {{- include "todo-chat-bot.selectorLabels" . | nindent 4 }}
+    app: postgres
+{{- end }}

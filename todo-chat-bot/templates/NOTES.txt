@@ -1,0 +1,41 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }} and is running in the {{ .Release.Namespace }} namespace.
+
+To access your local deployment:
+
+{{- if .Values.ingress.enabled }}
+  You can access the application at:
+  {{- range $host := .Values.ingress.hosts }}
+    {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+    {{- end }}
+  {{- end }}
+
+  Note: Make sure to add the host to your /etc/hosts file if using localhost:
+  echo "$(minikube ip) localhost" | sudo tee -a /etc/hosts
+
+{{- else }}
+  If ingress is not enabled, you can access the services using port forwarding:
+
+  # For the frontend:
+  kubectl port-forward svc/{{ include "todo-chat-bot.fullname" . }}-frontend-service {{ .Values.frontend.service.port }}:{{ .Values.frontend.service.port }} -n {{ .Release.Namespace }}
+
+  # For the backend:
+  kubectl port-forward svc/{{ include "todo-chat-bot.fullname" . }}-backend-service {{ .Values.backend.service.port }}:{{ .Values.backend.service.port }} -n {{ .Release.Namespace }}
+
+  Then access the frontend at http://localhost:{{ .Values.frontend.service.port }}
+  And the backend API at http://localhost:{{ .Values.backend.service.port }}/api
+{{- end }}
+
+{{- if .Values.backend.enabled | default true }}
+Backend service: {{ include "todo-chat-bot.fullname" . }}-backend-service:{{ .Values.backend.service.port }}
+{{- end }}
+{{- if .Values.frontend.enabled | default true }}
+Frontend service: {{ include "todo-chat-bot.fullname" . }}-frontend-service:{{ .Values.frontend.service.port }}
+{{- end }}
+{{- if .Values.postgres.enabled | default true }}
+PostgreSQL service: {{ include "todo-chat-bot.fullname" . }}-postgres-service:{{ .Values.postgres.service.port }}
+{{- end }}
+
+For more information on using this chart, visit the project documentation.
